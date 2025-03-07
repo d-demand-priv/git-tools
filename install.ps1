@@ -1,21 +1,5 @@
 # Windows Installation Script for Git Tools
 
-# Check if dialog is installed (via Chocolatey)
-if (-not (Get-Command dialog -ErrorAction SilentlyContinue)) {
-    Write-Host "Installing dialog via Chocolatey..."
-    
-    # Check if Chocolatey is installed
-    if (-not (Get-Command choco -ErrorAction SilentlyContinue)) {
-        Write-Host "Chocolatey is not installed. Installing Chocolatey..."
-        Set-ExecutionPolicy Bypass -Scope Process -Force
-        [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
-        Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
-    }
-    
-    # Install dialog
-    choco install dialog -y
-}
-
 # Get the current directory
 $currentDir = $PSScriptRoot
 
