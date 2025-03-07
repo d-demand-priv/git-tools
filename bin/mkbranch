@@ -142,7 +142,30 @@ BRANCH_NAME="${TICKET_TYPE}/${TICKET_ID}/${BRANCH_DESCRIPTION}/${BRANCH_SUFFIX}"
 
 read -e -p "Your branch name is '${BRANCH_NAME}', would you like to create it now? (Y/n)" -n 1 -r
 if [[ ! $REPLY =~ ^[Nn]$ ]]; then
-    git branch "${BRANCH_NAME}" || bash -c 'echo "ERROR: Failed to create branch" && exit 1'
+    # Check if repository has commits
+    if git rev-parse --verify HEAD >/dev/null 2>&1; then
+        # Repository has commits
+        # Get current branch as starting point
+        CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+        
+        # Create branch from current branch
+        git branch "${BRANCH_NAME}" "${CURRENT_BRANCH}" || bash -c 'echo "ERROR: Failed to create branch" && exit 1'
+    else
+        # Repository has no commits
+        echo "Repository has no commits yet. Creating an initial commit first..."
+        
+        # Create an empty commit
+        read -e -p "Would you like to create an initial commit? (Y/n)" -n 1 -r
+        if [[ ! $REPLY =~ ^[Nn]$ ]]; then
+            git commit --allow-empty -m "Initial commit" || bash -c 'echo "ERROR: Failed to create initial commit" && exit 1'
+            
+            # Now create the branch
+            git branch "${BRANCH_NAME}" || bash -c 'echo "ERROR: Failed to create branch" && exit 1'
+        else
+            echo "Cannot create a branch without at least one commit in the repository."
+            exit 1
+        fi
+    fi
 else
     exit 1
 fi
